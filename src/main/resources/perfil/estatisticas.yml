@@ -1,0 +1,20 @@
+games:
+  parkour:
+    nome: "&bParkour do Lobby"
+    icone: "FEATHER"
+    slot: 10
+    # Interno do Lobby, não precisa de config MySQL externa
+
+  chat:
+    nome: "&eJogos do Chat"
+    icone: "PAPER"
+    slot: 11
+
+  # EXEMPLO FUTURO (Para quando você tiver BedWars)
+  # bedwars:
+  #   nome: "&cBedWars"
+  #   icone: "RED_BED"
+  #   slot: 13
+  #   mysql_tabela: "bw_stats_players"
+  #   coluna_kills: "kills"
+  #   coluna_mortes: "deaths"

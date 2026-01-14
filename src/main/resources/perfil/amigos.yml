@@ -1,0 +1,33 @@
+menu:
+  titulo: "&8Amigos"
+  titulo_solicitacoes: "&8Solicitações Pendentes"
+  titulo_lista: "&8Lista de Amigos"
+
+itens:
+  adicionar:
+    nome: "&aAdicionar Amigo"
+    icone: "INK_SACK:10" # Lime Dye
+    slot: 11
+    lore:
+      - "&7Clique para enviar um pedido"
+      - "&7de amizade para alguém."
+
+  lista:
+    nome: "&eSeus Amigos"
+    icone: "BOOK"
+    slot: 13
+    lore:
+      - "&7Veja quem são seus amigos."
+      - ""
+      - "&fTotal: &a%total%"
+    lore_lista: "&7- &f%amigo%"
+    lore_vazio: "&cVocê não tem amigos :("
+
+  solicitacoes:
+    nome: "&bSolicitações Pendentes"
+    icone: "PAPER"
+    slot: 15
+    lore:
+      - "&7Veja quem quer ser seu amigo."
+      - ""
+      - "&fPendentes: &e%qtd%"

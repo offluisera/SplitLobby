@@ -1,0 +1,35 @@
+name: SplitLobby
+version: 1.0-SNAPSHOT
+main: org.github.luisera.splitlobby.Main
+api-version: 1.13 # Isso permite carregar em versões novas sem modo legacy, mas funciona na 1.8 se compilado certo
+authors: [Luisera]
+softdepend: [PlaceholderAPI]
+depend: [RedeSplitCore]
+
+commands:
+  slscore:
+    description: Comandos da Scoreboard
+    aliases: [sb, scoreboard]
+  sltab:
+    description: Comandos da Tablist
+    aliases: [tablist]
+  slset:
+    description: Define o local do lobby
+    permission: sl.admin
+  slparkour:
+    description: Comandos de setup do parkour
+    permission: sl.admin
+    usage: /slparkour setup
+  recompensas:
+    description: Abre o menu de recompensas
+    aliases: [ daily, rewards, tempo ]
+  slsecret:
+    description: Gerencia os Easter Eggs
+    permission: sl.admin
+  perfil:
+    description: Abre o perfil
+  slnpc:
+    description: Gerenciar NPCs do lobby
+    usage: /slnpc <create|delete|setskin|list|tp|setdesc>
+    permission: splitlobby.admin
+    aliases: [ npc, lobbynpc ]

@@ -1,0 +1,11 @@
+settings:
+  enabled: true
+  title: "&f&lREDE &E&LSPLIT"
+  update-interval: 20 # Em ticks (20 ticks = 1 segundo)
+
+lines:
+  - ""
+  - "&7Lobby: &e#1"
+  - "&7Players: &a%players%"
+  - ""
+  - "&eredesplit.com.br"

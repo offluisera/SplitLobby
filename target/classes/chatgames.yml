@@ -1,0 +1,34 @@
+config:
+  intervalo_segundos: 300 # 5 minutos
+  # O texto que aparece na linha "Recompensa:"
+  premio_visual: "100 Coins"
+
+mensagens:
+  # O cabeçalho
+  header: "&b&lJOGOS"
+
+  # Formatos das perguntas
+  formato_matematica: "&eMatemática: Quanto é %conta%?"
+  formato_palavra: "&eDesembaralhe: Qual é a palavra %palavra%?"
+  formato_recompensa: "&eRecompensa: &f%premio%"
+
+  venceu: "&a%player% &fvenceu o jogo! Resposta: &e%resposta% &7(%tempo%s)"
+  venceu_premio: "&a+100 Coins"
+  ninguem_acertou: "&cO tempo acabou! A resposta era: &e%resposta%"
+
+premios:
+  - "eco give %player% 100"
+
+palavras:
+  - "Minecraft"
+  - "SplitLobby"
+  - "Diamante"
+  - "Parkour"
+  - "Servidor"
+  - "Creeper"
+
+matematica:
+  min: 10
+  max: 100
+  somar: true
+  diminuir: true

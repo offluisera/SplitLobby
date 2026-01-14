@@ -1,0 +1,41 @@
+menu:
+  titulo: "&8Meu Perfil"
+  tamanho: 27
+
+itens:
+  # O item central (Cabeça) é gerado automaticamente pelo código com a skin do player,
+  # mas você pode configurar o resto aqui se adaptarmos o ProfileManager para ler tudo dinamicamente.
+
+  estatisticas:
+    nome: "&eEstatísticas"
+    icone: "BOOK"
+    slot: 11
+    lore:
+      - "&7Veja seus status em minigames,"
+      - "&7parkour e segredos."
+      - ""
+      - "&eClique para ver."
+
+  informacoes:
+    # Apenas visual, o código sobrescreve com a Head do player
+    slot: 13
+
+  configuracoes:
+    nome: "&bConfigurações"
+    icone: "COMPARATOR" # ou REDSTONE_COMPARATOR
+    slot: 15
+    lore:
+      - "&7Gerencie suas preferências"
+      - "&7de chat, tell e pedidos."
+      - ""
+      - "&eClique para configurar."
+
+  amigos:
+    nome: "&aAmigos"
+    icone: "PAPER"
+    slot: 16
+    lore:
+      - "&7Gerencie sua lista de amigos"
+      - "&7e solicitações."
+      - ""
+      - "&eClique para abrir."

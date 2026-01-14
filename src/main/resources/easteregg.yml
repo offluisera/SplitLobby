@@ -1,0 +1,30 @@
+# Configuração do Sistema de Secrets / Easter Eggs
+
+# Skin da cabeça que será usada (Value da Textura da Mojang/Minecraft-Heads)
+# Exemplo: Cabeça de "Presente" ou "Bau"
+skin_value: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjczYTIxMTRjMzI4N2M5M2Q4ODFkZDRjNjliODM4NGU1YjAxNTYyM2VjY2Y5NjhlNjA4ZWNlZGFmYjQ2OSJ9fX0="
+
+# Sons e Partículas ao encontrar
+efeitos:
+  som_encontrou: "ORB_PICKUP"
+  som_ja_encontrou: "VILLAGER_NO"
+  som_completou: "LEVEL_UP"
+  particula: "VILLAGER_HAPPY"
+
+mensagens:
+  prefixo: "&e&lMISTÉRIO &8» &f"
+  encontrou: "&aVocê encontrou uma head! &e(%encontrados%/%total%)"
+  ja_encontrou: "&cVocê já encontrou esta head!"
+  completou: "&a&lPARABÉNS! &fVocê encontrou todas as &e%total% &fheads escondidas!"
+
+recompensas:
+  # Executado cada vez que acha 1 cabeça (Opcional)
+  por_cabeca:
+    - "eco give %player% 100"
+    - "msg %player% &e+100 Coins!"
+
+  # Executado quando acha TODAS
+  completou_tudo:
+    - "eco give %player% 5000"
+    - "slscore reload"
+    - "broadcast &e%player% &aacabou de encontrar todas as heads do Lobby!"

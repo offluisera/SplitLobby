@@ -1,0 +1,34 @@
+# Configuração do Item na Hotbar
+hotbar-item:
+  material: COMPASS
+  name: "&a&lServidores"
+  slot: 4 # Meio da hotbar (0-8)
+
+# Configuração do Menu GUI
+menu:
+  title: "&8Selecione um Servidor"
+  rows: 3 # Linhas (1 a 6)
+
+# Itens dentro do menu
+servers:
+  rankup:
+    slot: 11
+    material: DIAMOND_SWORD
+    name: "&b&lRankUP"
+    lore:
+      - "&7O melhor servidor de"
+      - "&7RankUP do Brasil!"
+      - ""
+      - "&eClique para conectar!"
+    bungee-server: "rankup" # Nome exato que está no config.yml do BungeeCord
+
+  bedwars:
+    slot: 15
+    material: RED_BED
+    name: "&c&lBedWars"
+    lore:
+      - "&7Destrua a cama inimiga"
+      - "&7e seja o último a sobreviver."
+      - ""
+      - "&eClique para conectar!"
+    bungee-server: "bedwars"

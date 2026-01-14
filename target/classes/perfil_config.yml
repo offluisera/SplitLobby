@@ -1,0 +1,11 @@
+hotbar:
+  # Slot na hotbar (0 a 8)
+  # 0 = Primeiro slot, 1 = Segundo slot, 4 = Meio, 8 = Último
+  slot: 1
+
+  nome: "&aMeu Perfil &7(Clique)"
+
+  lore:
+    - "&7Clique com botão direito"
+    - "&7para acessar suas estatísticas,"
+    - "&7amigos e configurações."

@@ -1,0 +1,60 @@
+# ═══════════════════════════════════════════════════════════
+#                  SISTEMA DE NÍVEL VISUAL
+#                      SplitLobby v1.0
+# ═══════════════════════════════════════════════════════════
+
+# Ativa/Desativa o sistema de nível visual na hotbar
+ativado: true
+
+# Slot na hotbar (0-8)
+# 0 = Primeiro slot, 8 = Último slot
+slot: 8
+
+# Ícone do item
+# Materiais disponíveis: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+icone: NETHER_STAR
+
+# Nome do item (Placeholders disponíveis: %level%, %badge%, %xp%, %xp_next%, %progress%)
+nome: "&e&lSEU NÍVEL: %badge%"
+
+# Descrição do item
+lore:
+  - ""
+  - "&7XP Total: &f%xp%"
+  - "&7XP para Próximo Nível: &f%xp_next%"
+  - ""
+  - "&7Progresso: &e%progress%"
+  - "&7▰▰▰▰▰▰▰▰▰▰"
+  - ""
+  - "&eNível &f%level% &7- %badge%"
+  - ""
+  - "&7Complete parkours, missões"
+  - "&7e ganhe XP para subir de nível!"
+  - ""
+
+# ═══════════════════════════════════════════════════════════
+#                    INFORMAÇÕES ADICIONAIS
+# ═══════════════════════════════════════════════════════════
+#
+# Placeholders disponíveis:
+#   %level%     - Número do nível (ex: 5)
+#   %badge%     - Badge colorida (ex: §e[5 ★])
+#   %xp%        - XP total formatado (ex: 5,420)
+#   %xp_next%   - XP para próximo nível (ex: 580)
+#   %progress%  - Progresso em % (ex: 90.3%)
+#
+# Cores disponíveis:
+#   &0 = Preto      &8 = Cinza Escuro
+#   &1 = Azul       &9 = Azul Claro
+#   &2 = Verde      &a = Verde Claro
+#   &3 = Ciano      &b = Ciano Claro
+#   &4 = Vermelho   &c = Vermelho Claro
+#   &5 = Roxo       &d = Rosa
+#   &6 = Dourado    &e = Amarelo
+#   &7 = Cinza      &f = Branco
+#
+#   &l = Negrito    &o = Itálico
+#   &n = Sublinhado &m = Riscado
+#   &r = Reset
+#
+# ═══════════════════════════════════════════════════════════

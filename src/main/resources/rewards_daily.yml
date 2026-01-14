@@ -1,0 +1,62 @@
+menu:
+  titulo: "&8Recompensas de Tempo"
+  tamanho: 27 # 9, 18, 27, 36, 45, 54
+
+# Configuração das mensagens de status na Lore
+mensagens:
+  recebido: "&aSIM"
+  disponivel: "&aRESGATAR AGORA!"
+  pendente: "&cNÃO"
+
+recompensas:
+  viciado_1:
+    titulo: "&aViciado I"
+    slot: 10
+    # Use: M (minutos), H (horas), D (dias)
+    tempo: "2h"
+    icone_pendente: "WATCH"
+    icone_disponivel: "EMERALD"
+    icone_recebido: "MINECART"
+    lore:
+      - " "
+      - "&7Requisito: &fJogar por 2 horas"
+      - " "
+      - "&eProgresso: &f%progresso%"
+      - "&eReivindicado: %status%"
+      - " "
+    comandos:
+      - "give %player% diamond 10"
+
+  viciado_2:
+    titulo: "&6Viciado II"
+    slot: 12
+    tempo: "1d" # 1 Dia inteiro de jogo
+    icone_pendente: "WATCH"
+    icone_disponivel: "EMERALD"
+    icone_recebido: "MINECART"
+    lore:
+      - " "
+      - "&7Requisito: &fJogar por 1 Dia"
+      - " "
+      - "&eProgresso: &f%progresso%"
+      - "&eReivindicado: %status%"
+      - " "
+    comandos:
+      - "give %player% emerald 50"
+
+  iniciante:
+    titulo: "&eIniciante"
+    slot: 14
+    tempo: "30m"
+    icone_pendente: "WATCH"
+    icone_disponivel: "EMERALD"
+    icone_recebido: "MINECART"
+    lore:
+      - " "
+      - "&7Requisito: &fJogar por 30 minutos"
+      - " "
+      - "&eProgresso: &f%progresso%"
+      - "&eReivindicado: %status%"
+      - " "
+    comandos:
+      - "give %player% iron_ingot 5"

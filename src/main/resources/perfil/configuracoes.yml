@@ -1,0 +1,27 @@
+menu:
+  titulo: "&8Configurações"
+
+itens:
+  tell:
+    slot: 11
+    nome: "&eMensagens Privadas"
+    lore:
+      - "&7Receber mensagens de outros jogadores."
+      - ""
+      - "Status: %status%"
+
+  chat:
+    slot: 13
+    nome: "&eChat Global"
+    lore:
+      - "&7Ver mensagens do chat global."
+      - ""
+      - "Status: %status%"
+
+  pedidos:
+    slot: 15
+    nome: "&ePedidos de Amizade"
+    lore:
+      - "&7Receber solicitações de amizade."
+      - ""
+      - "Status: %status%"

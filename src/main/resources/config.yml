@@ -1,0 +1,71 @@
+
+# Configuração do mysql
+mysql:
+  enabled: true
+  host: "82.39.107.62" # Use IP numérico para evitar DNS lookup (mais rápido)
+  port: 3306
+  database: "lobby"
+  username: "lobby"
+  password: "Wj3K4LPcLrLJ4c7a"
+  # Configurações avançadas do Pool (Hikari)
+  pool-size: 10
+  connection-timeout: 30000
+
+# Configuração do redis
+  redis:
+    enabled: true
+    host: "82.39.107.62"
+    port: 6379
+    password: "UHAFDjbnakfye@@jouiayhfiqwer903" # Deixe vazio se não tiver senha
+    channel: "splitlobby:net" # Nome do canal de comunicação
+
+# DoubleJump no espaço
+double-jump:
+  enabled: true
+  velocity: 1.2      # Força para frente
+  height: 0.8        # Força para cima
+  sound: "BAT_TAKEOFF" # Nome do som (O XSound resolve a compatibilidade)
+  particle: "CLOUD"  # Efeito de particula
+
+# Launchpad
+launch-pad:
+  enabled: true
+  top-block: STONE_PRESSURE_PLATE # O bloco que pisa
+  bottom-block: REDSTONE_BLOCK    # O bloco que fica embaixo (escondido)
+  velocity: 2.0  # Força para frente
+  height: 1.5    # Força para cima
+  sound: "ENTITY_BAT_TAKEOFF"
+  effect: "EXPLOSION_LARGE"
+
+# Proteção do lobby
+protection:
+  enabled: true
+  block-break: true    # Impedir quebrar blocos
+  block-place: true    # Impedir colocar blocos
+  drop-item: true      # Impedir dropar itens
+  pickup-item: true    # Impedir pegar itens do chão
+  damage: true         # Impedir qualquer dano (PvP/PvE)
+  hunger: true         # Impedir fome
+  weather: true        # Impedir chuva
+  void-tp: true        # Teleportar ao cair no void
+  void-height: -5      # Altura para teleportar
+
+# Bloquear comandos
+commands:
+  blocked-message: "&cComando desconhecido." # Mensagem fake para enganar
+  blocked-list:
+    - "/pl"
+    - "/plugins"
+    - "/ver"
+    - "/version"
+    - "/about"
+    - "/?"
+    - "/help"
+    - "/icanhasbukkit"
+    - "/bukkit:pl"
+    - "/bukkit:plugins"
+    - "/bukkit:ver"
+    - "/bukkit:version"
+    - "/bukkit:about"
+    - "/minecraft:me"
+    - "/me"

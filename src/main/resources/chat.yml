@@ -1,0 +1,7 @@
+chat:
+  enabled: true
+  # Formato: %tag% será substituído pela tag definida abaixo
+  format: "%splitcore_rank% %nick%: &7%mensagem%"
+
+  # Som ao enviar mensagem
+  sound: "CLICK"

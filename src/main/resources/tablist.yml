@@ -1,0 +1,16 @@
+settings:
+  enabled: true
+  update-interval: 20 # Tempo em ticks (20 = 1 segundo)
+
+# Lista de linhas do Cabeçalho (Parte de Cima)
+header:
+  - ""
+  - "&f&lREDE &e&lSPLIT"
+  - ""
+
+# Lista de linhas do Rodapé (Parte de Baixo)
+footer:
+  - ""
+  - "&fSite: &eredesplit.com.br"
+  - "&fDiscord: &edc.redesplit.com.br"
+  - ""
