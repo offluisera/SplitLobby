@@ -9,7 +9,6 @@ import org.github.luisera.splitlobby.npc.NPCData;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 public class NPCCommand implements CommandExecutor {
 
@@ -39,85 +38,92 @@ public class NPCCommand implements CommandExecutor {
             return true;
         }
 
-        switch (args[0].toLowerCase()) {
-            case "create":
-            case "criar":
-                if (args.length < 2) {
-                    player.sendMessage("§cUso: /slnpc create <nome>");
-                    return true;
-                }
-                createNPC(player, args[1]);
-                break;
+        try {
+            switch (args[0].toLowerCase()) {
+                case "create":
+                case "criar":
+                    plugin.getNPCConversationManager().startCreateConversation(player);
+                    break;
 
-            case "delete":
-            case "deletar":
-                if (args.length < 2) {
-                    player.sendMessage("§cUso: /slnpc delete <id>");
-                    return true;
-                }
-                deleteNPC(player, args[1]);
-                break;
+                case "edit":
+                case "editar":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc edit <id>");
+                        return true;
+                    }
+                    plugin.getNPCConversationManager().startFullEditConversation(player, Integer.parseInt(args[1]));
+                    break;
 
-            case "setskin":
-                if (args.length < 3) {
-                    player.sendMessage("§cUso: /slnpc setskin <id> <nick>");
-                    return true;
-                }
-                setSkin(player, args[1], args[2]);
-                break;
+                case "delete":
+                case "deletar":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc delete <id>");
+                        return true;
+                    }
+                    deleteNPC(player, args[1]);
+                    break;
 
-            case "setcmd":
-            case "setcommand":
-                if (args.length < 3) {
-                    player.sendMessage("§cUso: /slnpc setcmd <id> <comando>");
-                    return true;
-                }
-                setCommand(player, args[1], String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
-                break;
+                case "setskin":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc setskin <id>");
+                        return true;
+                    }
+                    plugin.getNPCConversationManager().startEditConversation(
+                            player,
+                            Integer.parseInt(args[1]),
+                            org.github.luisera.splitlobby.npc.NPCConversationManager.EditType.SKIN
+                    );
+                    break;
 
-            case "setdesc":
-            case "setdescription":
-                if (args.length < 3) {
-                    player.sendMessage("§cUso: /slnpc setdesc <id> <linha1> | <linha2> | ...");
-                    player.sendMessage("§7Exemplo: /slnpc setdesc 1 &bBedwars | &7Clique com direito");
-                    return true;
-                }
-                setDescription(player, args[1], String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
-                break;
+                case "setcmd":
+                case "setcommand":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc setcmd <id>");
+                        return true;
+                    }
+                    plugin.getNPCConversationManager().startEditConversation(
+                            player,
+                            Integer.parseInt(args[1]),
+                            org.github.luisera.splitlobby.npc.NPCConversationManager.EditType.COMMAND
+                    );
+                    break;
 
-            case "list":
-            case "lista":
-                listNPCs(player);
-                break;
+                case "setdesc":
+                case "setdescription":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc setdesc <id>");
+                        return true;
+                    }
+                    plugin.getNPCConversationManager().startEditConversation(
+                            player,
+                            Integer.parseInt(args[1]),
+                            org.github.luisera.splitlobby.npc.NPCConversationManager.EditType.DESCRIPTION
+                    );
+                    break;
 
-            case "tp":
-            case "teleport":
-                if (args.length < 2) {
-                    player.sendMessage("§cUso: /slnpc tp <id>");
-                    return true;
-                }
-                teleportToNPC(player, args[1]);
-                break;
+                case "list":
+                case "lista":
+                    listNPCs(player);
+                    break;
 
-            default:
-                sendHelp(player);
-                break;
+                case "tp":
+                case "teleport":
+                    if (args.length < 2) {
+                        player.sendMessage("§cUso: /slnpc tp <id>");
+                        return true;
+                    }
+                    teleportToNPC(player, args[1]);
+                    break;
+
+                default:
+                    sendHelp(player);
+                    break;
+            }
+        } catch (NumberFormatException e) {
+            player.sendMessage("§cID inválido! Use um número.");
         }
 
         return true;
-    }
-
-    private void createNPC(Player player, String name) {
-        NPCData npc = plugin.getNPCManager().createNPC(name, player.getLocation());
-
-        player.sendMessage("");
-        player.sendMessage("§a§l✓ NPC CRIADO!");
-        player.sendMessage("§e  ID: §f#" + npc.getId());
-        player.sendMessage("§e  Nome: §f" + npc.getName());
-        player.sendMessage("§e  Localização: §f" + formatLocation(npc.getLocation()));
-        player.sendMessage("");
-        player.sendMessage("§7Use §e/slnpc setskin " + npc.getId() + " <nick> §7para definir a skin");
-        player.sendMessage("");
     }
 
     private void deleteNPC(Player player, String idStr) {
@@ -136,93 +142,6 @@ public class NPCCommand implements CommandExecutor {
             player.sendMessage("§c§l✗ NPC DELETADO!");
             player.sendMessage("§e  ID: §f#" + id);
             player.sendMessage("§e  Nome: §f" + npc.getName());
-            player.sendMessage("");
-
-        } catch (NumberFormatException e) {
-            player.sendMessage("§cID inválido! Use um número.");
-        }
-    }
-
-    private void setSkin(Player player, String idStr, String skinName) {
-        try {
-            int id = Integer.parseInt(idStr);
-            NPCData npc = plugin.getNPCManager().getNPC(id);
-
-            if (npc == null) {
-                player.sendMessage("§cNPC #" + id + " não encontrado!");
-                return;
-            }
-
-            player.sendMessage("");
-            player.sendMessage("§e§l⌛ APLICANDO SKIN...");
-            player.sendMessage("§7Buscando skin de: §f" + skinName);
-            player.sendMessage("§7Aguarde...");
-            player.sendMessage("");
-
-            plugin.getNPCManager().setSkin(id, skinName);
-
-            // Feedback após 2 segundos
-            org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                player.sendMessage("");
-                player.sendMessage("§a§l✓ SKIN APLICADA!");
-                player.sendMessage("§e  NPC: §f" + npc.getName() + " §7(#" + id + ")");
-                player.sendMessage("§e  Skin: §f" + skinName);
-                player.sendMessage("");
-            }, 40L);
-
-        } catch (NumberFormatException e) {
-            player.sendMessage("§cID inválido! Use um número.");
-        }
-    }
-
-    private void setCommand(Player player, String idStr, String command) {
-        try {
-            int id = Integer.parseInt(idStr);
-            NPCData npc = plugin.getNPCManager().getNPC(id);
-
-            if (npc == null) {
-                player.sendMessage("§cNPC #" + id + " não encontrado!");
-                return;
-            }
-
-            plugin.getNPCManager().setCommand(id, command);
-
-            player.sendMessage("");
-            player.sendMessage("§a§l✓ COMANDO DEFINIDO!");
-            player.sendMessage("§e  NPC: §f" + npc.getName() + " §7(#" + id + ")");
-            player.sendMessage("§e  Comando: §f" + command);
-            player.sendMessage("");
-            player.sendMessage("§7Variáveis disponíveis:");
-            player.sendMessage("§7  {player} §f- Nome do jogador");
-            player.sendMessage("§7  {uuid} §f- UUID do jogador");
-            player.sendMessage("§7Use [CONSOLE] no início para executar como console");
-            player.sendMessage("");
-
-        } catch (NumberFormatException e) {
-            player.sendMessage("§cID inválido! Use um número.");
-        }
-    }
-
-    private void setDescription(Player player, String idStr, String description) {
-        try {
-            int id = Integer.parseInt(idStr);
-            NPCData npc = plugin.getNPCManager().getNPC(id);
-
-            if (npc == null) {
-                player.sendMessage("§cNPC #" + id + " não encontrado!");
-                return;
-            }
-
-            List<String> lines = Arrays.asList(description.split("\\|"));
-            plugin.getNPCManager().setDescription(id, lines);
-
-            player.sendMessage("");
-            player.sendMessage("§a§l✓ DESCRIÇÃO DEFINIDA!");
-            player.sendMessage("§e  NPC: §f" + npc.getName() + " §7(#" + id + ")");
-            player.sendMessage("§e  Linhas:");
-            for (String line : lines) {
-                player.sendMessage("    " + org.bukkit.ChatColor.translateAlternateColorCodes('&', line.trim()));
-            }
             player.sendMessage("");
 
         } catch (NumberFormatException e) {
@@ -273,11 +192,12 @@ public class NPCCommand implements CommandExecutor {
         player.sendMessage("");
         player.sendMessage("§6§l⚑ SISTEMA DE NPCS");
         player.sendMessage("");
-        player.sendMessage("§e  /slnpc create <nome> §7- Cria um NPC");
+        player.sendMessage("§e  /slnpc create §7- Cria um NPC (modo conversa)");
+        player.sendMessage("§e  /slnpc edit <id> §7- Edita nome e descrição");
         player.sendMessage("§e  /slnpc delete <id> §7- Deleta um NPC");
-        player.sendMessage("§e  /slnpc setskin <id> <nick> §7- Define a skin");
-        player.sendMessage("§e  /slnpc setcmd <id> <comando> §7- Define comando");
-        player.sendMessage("§e  /slnpc setdesc <id> <desc> §7- Define descrição");
+        player.sendMessage("§e  /slnpc setskin <id> §7- Define a skin");
+        player.sendMessage("§e  /slnpc setcmd <id> §7- Define comando");
+        player.sendMessage("§e  /slnpc setdesc <id> §7- Define descrição");
         player.sendMessage("§e  /slnpc list §7- Lista todos os NPCs");
         player.sendMessage("§e  /slnpc tp <id> §7- Teleporta para um NPC");
         player.sendMessage("");

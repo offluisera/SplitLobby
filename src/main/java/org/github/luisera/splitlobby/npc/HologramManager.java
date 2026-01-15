@@ -21,7 +21,8 @@ public class HologramManager {
         WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
         List<EntityArmorStand> stands = new ArrayList<>();
 
-        double y = location.getY() + 2.0; // Começa acima do NPC
+        // Altura inicial BEM BAIXA (na altura da cabeça/peito)
+        double y = location.getY() + 1.7;
 
         for (int i = lines.size() - 1; i >= 0; i--) {
             String line = lines.get(i);
@@ -33,11 +34,14 @@ public class HologramManager {
             stand.setInvisible(true);
             stand.setSmall(true);
             stand.setNoGravity(true);
-            stand.setMarker(true);
+            stand.setMarker(true); // IMPORTANTE: Permite clicar através
             stand.setBasePlate(false);
 
+            // Remove colisão para não bloquear cliques
+            stand.getWorld().addEntity(stand);
+
             stands.add(stand);
-            y += 0.3; // Espaçamento entre linhas
+            y += 0.25; // Espaçamento entre linhas
         }
 
         holograms.put(npcId, stands);
@@ -67,8 +71,27 @@ public class HologramManager {
 
         PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
 
-        int[] ids = stands.stream().mapToInt(EntityArmorStand::getId).toArray();
-        connection.sendPacket(new PacketPlayOutEntityDestroy(ids));
+        // Coleta IDs de todos os armor stands
+        int[] ids = stands.stream()
+                .mapToInt(stand -> stand.getId())
+                .toArray();
+
+        if (ids.length > 0) {
+            connection.sendPacket(new PacketPlayOutEntityDestroy(ids));
+        }
+    }
+
+    /**
+     * Remove hologramas para todos os jogadores online
+     */
+    public void removeHologramForAll(int npcId) {
+        List<EntityArmorStand> stands = holograms.get(npcId);
+        if (stands == null || stands.isEmpty()) return;
+
+        // Remove para todos os jogadores
+        for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+            hideHologram(player, npcId);
+        }
     }
 
     /**
@@ -76,7 +99,15 @@ public class HologramManager {
      */
     public void removeHologram(int npcId) {
         List<EntityArmorStand> stands = holograms.remove(npcId);
-        if (stands != null) {
+        if (stands != null && !stands.isEmpty()) {
+            // Remove os armor stands do mundo
+            for (EntityArmorStand stand : stands) {
+                try {
+                    stand.die(); // Remove do mundo
+                } catch (Exception e) {
+                    // Ignora erro
+                }
+            }
             stands.clear();
         }
     }

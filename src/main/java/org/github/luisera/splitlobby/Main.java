@@ -11,6 +11,9 @@ import org.github.luisera.splitlobby.data.DataManager;
 import org.github.luisera.splitlobby.database.MySQLManager;
 import org.github.luisera.splitlobby.listeners.*;
 import org.github.luisera.splitlobby.managers.*;
+import org.github.luisera.splitlobby.npc.NPCChatListener;
+import org.github.luisera.splitlobby.npc.NPCClickDetector;
+import org.github.luisera.splitlobby.npc.NPCConversationManager;
 import org.github.luisera.splitlobby.npc.NPCManager;
 import org.github.luisera.splitlobby.redis.RedisManager;
 import org.github.luisera.splitlobby.scoreboard.ScoreboardManager;
@@ -30,7 +33,6 @@ public class Main extends JavaPlugin {
     private static Main instance;
 
     // Gerenciadores
-    private NPCManager npcManager;
     private MySQLManager mysqlManager;
     private DataManager dataManager;
     private RedisManager redisManager;
@@ -56,6 +58,8 @@ public class Main extends JavaPlugin {
     private PlaceholderAPI placeholderAPI;
 
     private LevelDisplayManager levelDisplayManager;
+    private NPCManager npcManager;
+    private NPCConversationManager npcConversationManager;
 
 
     @Override
@@ -134,6 +138,7 @@ public class Main extends JavaPlugin {
         this.selectorManager = new SelectorManager(this);
         this.levelDisplayManager = new LevelDisplayManager(this);
         this.npcManager = new NPCManager(this);
+        this.npcConversationManager = new NPCConversationManager(this);
 
 
         enviarMensagem("§a[SplitLobby] Managers carregados!");
@@ -159,6 +164,9 @@ public class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new JoinLobbyListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ParkourListener(this, this.parkourManager), this);
         getServer().getPluginManager().registerEvents(new NPCListener(this), this);
+        getServer().getPluginManager().registerEvents(new NPCClickDetector(this), this);
+        getServer().getPluginManager().registerEvents(new NPCChatListener(this), this);
+
 
         enviarMensagem("§a[SplitLobby] Eventos registrados!");
 
@@ -332,6 +340,10 @@ public class Main extends JavaPlugin {
 
     public NPCManager getNPCManager() {
         return npcManager;
+    }
+
+    public NPCConversationManager getNPCConversationManager() {
+        return npcConversationManager;
     }
 
     // === GETTERS DA INTEGRAÇÃO COM REDESPLITCORE ===

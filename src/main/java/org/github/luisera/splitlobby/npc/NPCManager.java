@@ -34,6 +34,9 @@ public class NPCManager {
         NPCData npc = new NPCData(nextId++, uuid, name, location);
 
         npcs.put(npc.getId(), npc);
+
+        plugin.getLogger().info("§e[NPC] Criando NPC #" + npc.getId() + " - Nome: " + name);
+
         spawnNPC(npc);
         saveNPC(npc);
 
@@ -47,8 +50,8 @@ public class NPCManager {
         MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         WorldServer world = ((CraftWorld) npc.getLocation().getWorld()).getHandle();
 
-        // Cria GameProfile com UUID único
-        GameProfile profile = new GameProfile(npc.getUuid(), npc.getName());
+        // Cria GameProfile com UUID único e nome vazio (para não aparecer na tablist)
+        GameProfile profile = new GameProfile(npc.getUuid(), "");
 
         // Aplica skin se tiver
         if (npc.getSkinTexture() != null && npc.getSkinSignature() != null) {
@@ -66,10 +69,20 @@ public class NPCManager {
         // Salva entidade
         entities.put(npc.getId(), entityPlayer);
 
-        // Cria hologramas se tiver descrição
+        // Cria hologramas - APENAS DESCRIÇÃO (sem nome duplicado)
+        List<String> holoLines = new ArrayList<>();
+
+        // Adiciona a descrição (se tiver)
         if (npc.getDescription() != null && !npc.getDescription().isEmpty()) {
-            hologramManager.createHologram(npc.getId(), loc.clone().add(0, 0.3, 0), npc.getDescription());
+            holoLines.addAll(npc.getDescription());
         }
+
+        // Se não tiver descrição, adiciona só o nome
+        if (holoLines.isEmpty()) {
+            holoLines.add(npc.getName());
+        }
+
+        hologramManager.createHologram(npc.getId(), loc.clone(), holoLines);
 
         // Mostra para todos os jogadores online
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -86,21 +99,25 @@ public class NPCManager {
 
         PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
 
-        // Packet de spawn do player
+        // Packet de adicionar na tablist (NECESSÁRIO para spawnar)
         connection.sendPacket(new PacketPlayOutPlayerInfo(
                 PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npcEntity));
 
+        // Packet de spawn do player
         connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npcEntity));
 
         // Packet de rotação da cabeça
         connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcEntity,
                 (byte) (npcEntity.yaw * 256 / 360)));
 
-        // Remove da tablist após 1 segundo
+        // Remove da tablist após alguns ticks (para não aparecer na lista)
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            connection.sendPacket(new PacketPlayOutPlayerInfo(
-                    PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcEntity));
-        }, 20L);
+            PlayerConnection conn = ((CraftPlayer) player).getHandle().playerConnection;
+            if (conn != null) {
+                conn.sendPacket(new PacketPlayOutPlayerInfo(
+                        PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcEntity));
+            }
+        }, 5L); // 5 ticks = 0.25 segundos
 
         // Mostra holograma
         hologramManager.showHologram(player, npcId);
@@ -114,7 +131,13 @@ public class NPCManager {
         if (npcEntity == null) return;
 
         PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
+
+        // Remove o NPC
         connection.sendPacket(new PacketPlayOutEntityDestroy(npcEntity.getId()));
+
+        // Remove da tablist
+        connection.sendPacket(new PacketPlayOutPlayerInfo(
+                PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcEntity));
 
         // Esconde holograma
         hologramManager.hideHologram(player, npcId);
@@ -127,10 +150,16 @@ public class NPCManager {
         NPCData npc = npcs.get(npcId);
         if (npc == null) return;
 
+        // Remove hologramas para todos primeiro
+        hologramManager.removeHologramForAll(npcId);
+
         // Remove para todos os jogadores
         for (Player player : Bukkit.getOnlinePlayers()) {
             hideNPC(player, npcId);
         }
+
+        // Remove hologramas completamente
+        hologramManager.removeHologram(npcId);
 
         // Remove do banco
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -140,14 +169,18 @@ public class NPCManager {
                 );
                 ps.setInt(1, npcId);
                 ps.executeUpdate();
+
+                plugin.getLogger().info("§a[NPC] NPC #" + npcId + " deletado do banco de dados!");
             } catch (Exception e) {
+                plugin.getLogger().severe("§c[NPC] Erro ao deletar NPC #" + npcId + ":");
                 e.printStackTrace();
             }
         });
 
         npcs.remove(npcId);
         entities.remove(npcId);
-        hologramManager.removeHologram(npcId);
+
+        plugin.getLogger().info("§a[NPC] NPC #" + npcId + " removido completamente!");
     }
 
     /**
@@ -214,11 +247,12 @@ public class NPCManager {
         npc.setDescription(description);
         saveNPC(npc);
 
-        // Respawna o NPC para atualizar o holograma
+        // Respawna o NPC para atualizar o holograma (NOME + DESCRIÇÃO)
         for (Player player : Bukkit.getOnlinePlayers()) {
             hideNPC(player, npcId);
         }
         entities.remove(npcId);
+        hologramManager.removeHologram(npcId);
         spawnNPC(npc);
     }
 
@@ -226,21 +260,59 @@ public class NPCManager {
      * Executa o comando do NPC
      */
     public void executeCommand(int npcId, Player player) {
+        plugin.getLogger().info("§e[CMD DEBUG] ========== EXECUTANDO COMANDO ==========");
+        plugin.getLogger().info("§e[CMD DEBUG] NPC ID: " + npcId);
+        plugin.getLogger().info("§e[CMD DEBUG] Player: " + player.getName());
+
         NPCData npc = npcs.get(npcId);
-        if (npc == null || npc.getCommand() == null || npc.getCommand().isEmpty()) return;
+
+        if (npc == null) {
+            plugin.getLogger().warning("§c[CMD DEBUG] NPC #" + npcId + " é NULL!");
+            return;
+        }
+
+        plugin.getLogger().info("§e[CMD DEBUG] NPC encontrado: " + npc.getName());
+
+        if (npc.getCommand() == null) {
+            plugin.getLogger().warning("§c[CMD DEBUG] Comando é NULL!");
+            return;
+        }
+
+        if (npc.getCommand().isEmpty()) {
+            plugin.getLogger().warning("§c[CMD DEBUG] Comando está VAZIO!");
+            return;
+        }
+
+        plugin.getLogger().info("§a[CMD DEBUG] Comando encontrado: '" + npc.getCommand() + "'");
 
         String command = npc.getCommand()
                 .replace("{player}", player.getName())
                 .replace("{uuid}", player.getUniqueId().toString());
 
+        plugin.getLogger().info("§a[CMD DEBUG] Após replacements: '" + command + "'");
+
+        // Remove '/' do início se tiver
+        if (command.startsWith("/")) {
+            command = command.substring(1);
+            plugin.getLogger().info("§a[CMD DEBUG] Removeu /: '" + command + "'");
+        }
+
         // Se o comando começa com [CONSOLE], executa como console
         if (command.startsWith("[CONSOLE]")) {
             String cmd = command.replace("[CONSOLE]", "").trim();
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            plugin.getLogger().info("§a[CMD DEBUG] ★ Executando como CONSOLE: '" + cmd + "'");
+
+            boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            plugin.getLogger().info("§a[CMD DEBUG] Resultado: " + (result ? "SUCESSO" : "FALHOU"));
         } else {
             // Executa como jogador
-            Bukkit.dispatchCommand(player, command);
+            plugin.getLogger().info("§a[CMD DEBUG] ★ Executando como JOGADOR: '" + command + "'");
+
+            boolean result = Bukkit.dispatchCommand(player, command);
+            plugin.getLogger().info("§a[CMD DEBUG] Resultado: " + (result ? "SUCESSO" : "FALHOU"));
         }
+
+        plugin.getLogger().info("§e[CMD DEBUG] ==========================================");
     }
 
     /**
@@ -304,16 +376,31 @@ public class NPCManager {
                 ps.setString(5, npc.getSkinTexture());
                 ps.setString(6, npc.getSkinSignature());
                 ps.setString(7, npc.getCommand());
-                ps.setString(8, String.join("||", npc.getDescription()));
+
+                // Converte lista de descrição para string
+                String descriptionStr = null;
+                if (npc.getDescription() != null && !npc.getDescription().isEmpty()) {
+                    descriptionStr = String.join("||", npc.getDescription());
+                }
+                ps.setString(8, descriptionStr);
+
                 ps.setString(9, loc.getWorld().getName());
                 ps.setDouble(10, loc.getX());
                 ps.setDouble(11, loc.getY());
                 ps.setDouble(12, loc.getZ());
                 ps.setFloat(13, loc.getYaw());
                 ps.setFloat(14, loc.getPitch());
-                ps.executeUpdate();
+
+                int rows = ps.executeUpdate();
+
+                if (rows > 0) {
+                    plugin.getLogger().info("§a[NPC] NPC #" + npc.getId() + " salvo no banco de dados!");
+                } else {
+                    plugin.getLogger().warning("§c[NPC] Falha ao salvar NPC #" + npc.getId());
+                }
 
             } catch (Exception e) {
+                plugin.getLogger().severe("§c[NPC] Erro ao salvar NPC #" + npc.getId() + ":");
                 e.printStackTrace();
             }
         });

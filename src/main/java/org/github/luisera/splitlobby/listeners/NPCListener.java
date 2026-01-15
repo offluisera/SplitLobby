@@ -1,11 +1,8 @@
 package org.github.luisera.splitlobby.listeners;
 
-import net.minecraft.server.v1_12_R1.EntityPlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.github.luisera.splitlobby.Main;
@@ -53,38 +50,6 @@ public class NPCListener implements Listener {
             // NPCs olham para jogadores a até 5 blocos de distância
             if (distance <= 5.0) {
                 plugin.getNPCManager().lookAt(npc.getId(), player);
-            }
-        }
-    }
-
-    /**
-     * Detecta cliques em NPCs
-     * NOTA: Este evento não funciona perfeitamente em NPCs fake
-     * Para detecção completa, você precisará usar PacketListener (ProtocolLib)
-     */
-    @EventHandler
-    public void onInteract(PlayerInteractEntityEvent event) {
-        Player player = event.getPlayer();
-        Entity entity = event.getRightClicked();
-
-        // Verifica se é um NPC (pela entity ID)
-        for (NPCData npc : plugin.getNPCManager().getAllNPCs()) {
-            EntityPlayer npcEntity = plugin.getNPCManager().getEntity(npc.getId());
-
-            // Compara o entity ID do Bukkit com o ID do NMS
-            if (npcEntity != null && npcEntity.getBukkitEntity().getEntityId() == entity.getEntityId()) {
-
-                // Executa o comando se tiver
-                if (npc.getCommand() != null && !npc.getCommand().isEmpty()) {
-                    plugin.getNPCManager().executeCommand(npc.getId(), player);
-                } else {
-                    // Mensagem padrão se não tiver comando
-                    player.sendMessage("§e§l[NPC] §f" + npc.getName() + "§e: §aOlá, " + player.getName() + "!");
-                    player.sendMessage("§7Use §e/slnpc setcmd " + npc.getId() + " <comando> §7para definir uma ação");
-                }
-
-                event.setCancelled(true);
-                break;
             }
         }
     }
