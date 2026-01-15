@@ -47,6 +47,9 @@ public class NPCManager {
      * Spawna o NPC no mundo
      */
     public void spawnNPC(NPCData npc) {
+        // Remove hologramas antigos se existirem (evita duplicação)
+        hologramManager.removeHologram(npc.getId());
+
         MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         WorldServer world = ((CraftWorld) npc.getLocation().getWorld()).getHandle();
 
@@ -65,6 +68,20 @@ public class NPCManager {
         // Define posição
         Location loc = npc.getLocation();
         entityPlayer.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+
+        // ★ SOLUÇÃO DEFINITIVA: Modifica o DataWatcher ANTES de spawnar
+        try {
+            DataWatcher watcher = entityPlayer.getDataWatcher();
+
+            // Custom Name = vazio
+            watcher.set(new DataWatcherObject<>(2, DataWatcherRegistry.d), "");
+
+            // Custom Name Visible = false
+            watcher.set(new DataWatcherObject<>(3, DataWatcherRegistry.h), false);
+
+        } catch (Exception e) {
+            plugin.getLogger().warning("§c[NPC] Erro ao configurar DataWatcher: " + e.getMessage());
+        }
 
         // Salva entidade
         entities.put(npc.getId(), entityPlayer);
@@ -110,14 +127,14 @@ public class NPCManager {
         connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcEntity,
                 (byte) (npcEntity.yaw * 256 / 360)));
 
-        // Remove da tablist após alguns ticks (para não aparecer na lista)
+        // Remove da tablist IMEDIATAMENTE
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             PlayerConnection conn = ((CraftPlayer) player).getHandle().playerConnection;
             if (conn != null) {
                 conn.sendPacket(new PacketPlayOutPlayerInfo(
                         PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcEntity));
             }
-        }, 5L); // 5 ticks = 0.25 segundos
+        }, 1L);
 
         // Mostra holograma
         hologramManager.showHologram(player, npcId);
@@ -247,7 +264,7 @@ public class NPCManager {
         npc.setDescription(description);
         saveNPC(npc);
 
-        // Respawna o NPC para atualizar o holograma (NOME + DESCRIÇÃO)
+        // Respawna o NPC para atualizar o holograma
         for (Player player : Bukkit.getOnlinePlayers()) {
             hideNPC(player, npcId);
         }
@@ -260,59 +277,34 @@ public class NPCManager {
      * Executa o comando do NPC
      */
     public void executeCommand(int npcId, Player player) {
-        plugin.getLogger().info("§e[CMD DEBUG] ========== EXECUTANDO COMANDO ==========");
-        plugin.getLogger().info("§e[CMD DEBUG] NPC ID: " + npcId);
-        plugin.getLogger().info("§e[CMD DEBUG] Player: " + player.getName());
-
         NPCData npc = npcs.get(npcId);
 
         if (npc == null) {
-            plugin.getLogger().warning("§c[CMD DEBUG] NPC #" + npcId + " é NULL!");
+            plugin.getLogger().warning("§c[NPC] NPC #" + npcId + " não encontrado!");
             return;
         }
 
-        plugin.getLogger().info("§e[CMD DEBUG] NPC encontrado: " + npc.getName());
-
-        if (npc.getCommand() == null) {
-            plugin.getLogger().warning("§c[CMD DEBUG] Comando é NULL!");
-            return;
+        if (npc.getCommand() == null || npc.getCommand().isEmpty()) {
+            return; // Sem comando definido
         }
-
-        if (npc.getCommand().isEmpty()) {
-            plugin.getLogger().warning("§c[CMD DEBUG] Comando está VAZIO!");
-            return;
-        }
-
-        plugin.getLogger().info("§a[CMD DEBUG] Comando encontrado: '" + npc.getCommand() + "'");
 
         String command = npc.getCommand()
                 .replace("{player}", player.getName())
                 .replace("{uuid}", player.getUniqueId().toString());
 
-        plugin.getLogger().info("§a[CMD DEBUG] Após replacements: '" + command + "'");
-
         // Remove '/' do início se tiver
         if (command.startsWith("/")) {
             command = command.substring(1);
-            plugin.getLogger().info("§a[CMD DEBUG] Removeu /: '" + command + "'");
         }
 
         // Se o comando começa com [CONSOLE], executa como console
         if (command.startsWith("[CONSOLE]")) {
             String cmd = command.replace("[CONSOLE]", "").trim();
-            plugin.getLogger().info("§a[CMD DEBUG] ★ Executando como CONSOLE: '" + cmd + "'");
-
-            boolean result = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-            plugin.getLogger().info("§a[CMD DEBUG] Resultado: " + (result ? "SUCESSO" : "FALHOU"));
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         } else {
             // Executa como jogador
-            plugin.getLogger().info("§a[CMD DEBUG] ★ Executando como JOGADOR: '" + command + "'");
-
-            boolean result = Bukkit.dispatchCommand(player, command);
-            plugin.getLogger().info("§a[CMD DEBUG] Resultado: " + (result ? "SUCESSO" : "FALHOU"));
+            Bukkit.dispatchCommand(player, command);
         }
-
-        plugin.getLogger().info("§e[CMD DEBUG] ==========================================");
     }
 
     /**
@@ -410,6 +402,9 @@ public class NPCManager {
      * Carrega NPCs do banco
      */
     private void loadNPCs() {
+        // Limpa hologramas antigos ANTES de carregar
+        hologramManager.removeAllHolograms();
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try (java.sql.Connection conn = plugin.getMySQL().getConnection()) {
                 java.sql.PreparedStatement ps = conn.prepareStatement(
@@ -466,6 +461,24 @@ public class NPCManager {
                 e.printStackTrace();
             }
         });
+    }
+
+    /**
+     * Limpa todos os NPCs e hologramas (útil para reload)
+     */
+    public void shutdown() {
+        // Remove todos os NPCs dos jogadores
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            for (int npcId : npcs.keySet()) {
+                hideNPC(player, npcId);
+            }
+        }
+
+        // Limpa todos os hologramas
+        hologramManager.removeAllHolograms();
+
+        // Limpa entidades
+        entities.clear();
     }
 
     // Getters

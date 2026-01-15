@@ -55,6 +55,7 @@ public class TablistManager {
         }
 
         int interval = configFile.getConfig().getInt("settings.update-interval", 20);
+        plugin.enviarMensagem("§a[TablistManager] Tablist iniciada com sucesso!");
 
         task = new BukkitRunnable() {
             @Override
@@ -67,7 +68,6 @@ public class TablistManager {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     String header = montarTexto(p, headerList);
                     String footer = montarTexto(p, footerList);
-
                     enviarTablist(p, header, footer);
                 }
             }
@@ -114,27 +114,39 @@ public class TablistManager {
         try {
             sendPacketNMS(p, header, footer);
         } catch (Exception e) {
-            // Ignora erros
+            plugin.getLogger().warning("§c[TablistManager] Erro ao enviar tablist para " + p.getName());
         }
     }
 
     private void sendPacketNMS(Player p, String header, String footer) throws Exception {
-        Object headerJson = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0]
-                .getMethod("a", String.class)
-                .invoke(null, "{\"text\":\"" + header.replace("\n", "\\n") + "\"}");
+        // Cria os componentes de chat (IChatBaseComponent)
+        Class<?> chatComponentClass = getNMSClass("IChatBaseComponent");
+        Class<?> chatSerializerClass = chatComponentClass.getDeclaredClasses()[0];
 
-        Object footerJson = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0]
-                .getMethod("a", String.class)
-                .invoke(null, "{\"text\":\"" + footer.replace("\n", "\\n") + "\"}");
+        Method serializeMethod = chatSerializerClass.getMethod("a", String.class);
 
-        Object packet = getNMSClass("PacketPlayOutPlayerListHeaderFooter")
-                .getConstructor(getNMSClass("IChatBaseComponent"))
-                .newInstance(headerJson);
+        // Converte as strings para JSON e depois para IChatBaseComponent
+        Object headerComponent = serializeMethod.invoke(null,
+                "{\"text\":\"" + header.replace("\"", "\\\"").replace("\n", "\\n") + "\"}");
 
-        Field footerField = packet.getClass().getDeclaredField("b");
+        Object footerComponent = serializeMethod.invoke(null,
+                "{\"text\":\"" + footer.replace("\"", "\\\"").replace("\n", "\\n") + "\"}");
+
+        // No 1.12, o construtor é VAZIO - precisa setar os campos depois
+        Class<?> packetClass = getNMSClass("PacketPlayOutPlayerListHeaderFooter");
+        Object packet = packetClass.getConstructor().newInstance(); // Construtor vazio!
+
+        // Seta o header (campo "a")
+        Field headerField = packetClass.getDeclaredField("a");
+        headerField.setAccessible(true);
+        headerField.set(packet, headerComponent);
+
+        // Seta o footer (campo "b")
+        Field footerField = packetClass.getDeclaredField("b");
         footerField.setAccessible(true);
-        footerField.set(packet, footerJson);
+        footerField.set(packet, footerComponent);
 
+        // Envia o packet
         Object entityPlayer = p.getClass().getMethod("getHandle").invoke(p);
         Object playerConnection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
         playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet"))

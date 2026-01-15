@@ -12,7 +12,6 @@ import org.github.luisera.splitlobby.database.MySQLManager;
 import org.github.luisera.splitlobby.listeners.*;
 import org.github.luisera.splitlobby.managers.*;
 import org.github.luisera.splitlobby.npc.NPCChatListener;
-import org.github.luisera.splitlobby.npc.NPCClickDetector;
 import org.github.luisera.splitlobby.npc.NPCConversationManager;
 import org.github.luisera.splitlobby.npc.NPCManager;
 import org.github.luisera.splitlobby.redis.RedisManager;
@@ -164,7 +163,6 @@ public class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new JoinLobbyListener(this), this);
         Bukkit.getPluginManager().registerEvents(new ParkourListener(this, this.parkourManager), this);
         getServer().getPluginManager().registerEvents(new NPCListener(this), this);
-        getServer().getPluginManager().registerEvents(new NPCClickDetector(this), this);
         getServer().getPluginManager().registerEvents(new NPCChatListener(this), this);
 
 
